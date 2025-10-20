@@ -23,7 +23,7 @@ A comprehensive PyQt6 GUI application for transforming seismic grid data between
 ### Advanced Features
 - **Overwrite Protection**: Optional confirmation dialogs to prevent accidental file overwrites
 - **Background Processing**: Non-blocking transformations using multi-threading
-- **Error Handling**: Graceful fallbacks and comprehensive error reporting
+- **Error Handling**: Comprehensive error reporting with user alerts
 - **Virtual Environment**: Pre-configured setup for easy deployment
 
 ## 📋 Requirements
@@ -170,8 +170,7 @@ pip install PyQt6 matplotlib numpy pyproj
 
 ### Transformation Methods
 
-1. **Primary**: pyproj library for accurate EPSG transformations
-2. **Fallback**: Coordinate shift approximations when pyproj fails
+**pyproj Library**: Uses the PROJ library for accurate EPSG transformations. If pyproj fails to load or transform coordinates, the operation will fail with an error message to ensure data integrity.
 
 ### Performance
 

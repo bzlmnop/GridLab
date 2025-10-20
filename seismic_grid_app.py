@@ -179,23 +179,22 @@ class TransformationWorker(QThread):
         try:
             from pyproj import Transformer
             transformer = Transformer.from_crs(self.input_crs, self.output_crs, always_xy=True)
-            use_pyproj = True
         except Exception as e:
-            self.error_occurred.emit(f"pyproj not available: {e}\nUsing fallback transformation method.")
-            use_pyproj = False
+            self.error_occurred.emit(f"Failed to create coordinate transformation: {e}\nPlease ensure pyproj is properly installed and the selected CRS codes are valid.")
+            return
 
         total_files = len(self.files_to_transform)
 
         for i, (input_file, output_file) in enumerate(self.files_to_transform):
             try:
                 # Transform and save the file directly
-                self.transform_and_save_file(input_file, output_file, transformer if use_pyproj else None)
+                self.transform_and_save_file(input_file, output_file, transformer)
                 self.transformation_complete.emit(output_file, [])  # Empty data since file is already saved
                 self.progress_updated.emit(int((i + 1) / total_files * 100))
             except Exception as e:
                 self.error_occurred.emit(f"Error transforming {input_file}: {e}")
 
-    def transform_and_save_file(self, input_file, output_file, transformer=None):
+    def transform_and_save_file(self, input_file, output_file, transformer):
         """Transform a single file and save it directly"""
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -218,12 +217,8 @@ class TransformationWorker(QThread):
                             y = float(y_str)
                             z = float(z_str) if z_str != '1e+030' else 9999999.0
 
-                            if transformer:
-                                x_new, y_new = transformer.transform(x, y)
-                            else:
-                                # Fallback transformation
-                                x_new = x + 2.5
-                                y_new = y - 2.5
+                            # Transform coordinates using pyproj
+                            x_new, y_new = transformer.transform(x, y)
 
                             outfile.write(f"{x_new:12.2f}{y_new:12.2f}{z:12.6f}     1    \n")
                         else:
@@ -234,19 +229,15 @@ class TransformationWorker(QThread):
                         if len(parts) == 3:
                             x, y, z = map(float, parts)
 
-                            if transformer:
-                                x_new, y_new = transformer.transform(x, y)
-                            else:
-                                # Fallback transformation
-                                x_new = x + 2.5
-                                y_new = y - 2.5
+                            # Transform coordinates using pyproj
+                            x_new, y_new = transformer.transform(x, y)
 
                             outfile.write(f"{x_new:.5f},{y_new:.5f},{z:.4f}\n")
                         else:
                             outfile.write(line + '\n')
 
-                except:
-                    outfile.write(line + '\n')
+                except Exception as e:
+                    raise Exception(f"Failed to transform line {line_num}: {e}")
 
 class OutputTextViewer(QTextEdit):
     """Text viewer for displaying transformed output"""
@@ -522,14 +513,8 @@ class SeismicGridApp(QMainWindow):
 
         try:
             # Create transformation using selected CRS
-            try:
-                from pyproj import Transformer
-                transformer = Transformer.from_crs(self.input_crs, self.output_crs, always_xy=True)
-                use_pyproj = True
-            except Exception as e:
-                QMessageBox.warning(self, "Transformation Error",
-                                  f"Cannot create transformer: {e}\nUsing fallback method.")
-                use_pyproj = False
+            from pyproj import Transformer
+            transformer = Transformer.from_crs(self.input_crs, self.output_crs, always_xy=True)
 
             # Transform sample data for preview
             sample_lines = self.current_data[filename][:1000]  # Sample for preview
@@ -551,11 +536,8 @@ class SeismicGridApp(QMainWindow):
                             y = float(y_str)
                             z = float(z_str) if z_str != '1e+030' else 9999999.0
 
-                            if use_pyproj:
-                                x_new, y_new = transformer.transform(x, y)
-                            else:
-                                x_new = x + 2.5
-                                y_new = y - 2.5
+                            # Transform coordinates using pyproj
+                            x_new, y_new = transformer.transform(x, y)
 
                             transformed_lines.append(f"{x_new:12.2f}{y_new:12.2f}{z:12.6f}     1    \n")
                         else:
@@ -565,17 +547,14 @@ class SeismicGridApp(QMainWindow):
                         if len(parts) == 3:
                             x, y, z = map(float, parts)
 
-                            if use_pyproj:
-                                x_new, y_new = transformer.transform(x, y)
-                            else:
-                                x_new = x + 2.5
-                                y_new = y - 2.5
+                            # Transform coordinates using pyproj
+                            x_new, y_new = transformer.transform(x, y)
 
                             transformed_lines.append(f"{x_new:.5f},{y_new:.5f},{z:.4f}\n")
                         else:
                             transformed_lines.append(line + '\n')
 
-                except:
+                except Exception as e:
                     transformed_lines.append(line + '\n')
 
             # Update preview
@@ -606,66 +585,12 @@ class SeismicGridApp(QMainWindow):
             input_file = os.path.join(self.input_folder, filename)
             output_path = os.path.join(self.output_folder, filename)
 
-            try:
-                from pyproj import Transformer
-                transformer = Transformer.from_crs(self.input_crs, self.output_crs, always_xy=True)
-                use_pyproj = True
-            except Exception as e:
-                QMessageBox.warning(self, "Transformation Warning",
-                                  f"pyproj not available: {e}\nUsing fallback transformation method.")
-                use_pyproj = False
+            # Create transformation using selected CRS
+            from pyproj import Transformer
+            transformer = Transformer.from_crs(self.input_crs, self.output_crs, always_xy=True)
 
-            transformed_lines = []
-            with open(input_file, 'r') as infile:
-                for line in infile:
-                    line = line.strip()
-                    if not line:
-                        continue
-
-                    try:
-                        if filename.endswith('Faults.dat'):
-                            if len(line) >= 41:
-                                x_str = line[0:12].strip()
-                                y_str = line[12:24].strip()
-                                z_str = line[24:36].strip()
-
-                                x = float(x_str)
-                                y = float(y_str)
-                                z = float(z_str) if z_str != '1e+030' else 9999999.0
-
-                                if use_pyproj:
-                                    x_new, y_new = transformer.transform(x, y)
-                                else:
-                                    x_new = x + 2.5
-                                    y_new = y - 2.5
-
-                                transformed_lines.append(f"{x_new:12.2f}{y_new:12.2f}{z:12.6f}     1    \n")
-                            else:
-                                transformed_lines.append(line + '\n')
-                        else:
-                            parts = line.split(',')
-                            if len(parts) == 3:
-                                x, y, z = map(float, parts)
-
-                                if use_pyproj:
-                                    x_new, y_new = transformer.transform(x, y)
-                                else:
-                                    x_new = x + 2.5
-                                    y_new = y - 2.5
-
-                                transformed_lines.append(f"{x_new:.5f},{y_new:.5f},{z:.4f}\n")
-                            else:
-                                transformed_lines.append(line + '\n')
-
-                    except:
-                        transformed_lines.append(line + '\n')
-
-            # Ensure output directory exists
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-            # Write transformed data
-            with open(output_path, 'w') as outfile:
-                outfile.writelines(transformed_lines)
+            # Transform and save the file directly
+            self.transform_and_save_file_static(input_file, output_path, transformer)
 
             QMessageBox.information(self, "Success",
                                   f"File saved successfully to {output_path}\n"
@@ -673,6 +598,52 @@ class SeismicGridApp(QMainWindow):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error saving file: {str(e)}")
+
+@staticmethod
+def transform_and_save_file_static(input_file, output_file, transformer):
+    """Transform a single file and save it directly (static method for reuse)"""
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line_num, line in enumerate(infile, 1):
+            line = line.strip()
+            if not line:
+                continue
+
+            try:
+                # Handle fault files (fixed-width format)
+                if input_file.endswith('Faults.dat'):
+                    if len(line) >= 41:
+                        x_str = line[0:12].strip()
+                        y_str = line[12:24].strip()
+                        z_str = line[24:36].strip()
+
+                        x = float(x_str)
+                        y = float(y_str)
+                        z = float(z_str) if z_str != '1e+030' else 9999999.0
+
+                        # Transform coordinates using pyproj
+                        x_new, y_new = transformer.transform(x, y)
+
+                        outfile.write(f"{x_new:12.2f}{y_new:12.2f}{z:12.6f}     1    \n")
+                    else:
+                        outfile.write(line + '\n')
+                else:
+                    # Handle comma-separated format
+                    parts = line.split(',')
+                    if len(parts) == 3:
+                        x, y, z = map(float, parts)
+
+                        # Transform coordinates using pyproj
+                        x_new, y_new = transformer.transform(x, y)
+
+                        outfile.write(f"{x_new:.5f},{y_new:.5f},{z:.4f}\n")
+                    else:
+                        outfile.write(line + '\n')
+
+            except Exception as e:
+                raise Exception(f"Failed to transform line {line_num}: {e}")
 
     def convert_all_files(self):
         """Convert and save all files"""

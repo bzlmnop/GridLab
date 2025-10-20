@@ -1,0 +1,48 @@
+# Seismic Grid Data Files
+20251016/
+**/NAD27/
+**/NAD83/
+
+# Python Virtual Environments
+seismic_app_env/
+venv/
+env/
+ENV/
+.venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Test Files
+test_*.py
+*_test.py

@@ -170,7 +170,7 @@ pip install PyQt6 matplotlib numpy pyproj
 
 ### Transformation Methods
 
-**pyproj Library**: Uses the PROJ library for accurate EPSG transformations. If pyproj fails to load or transform coordinates, the operation will fail with an error message to ensure data integrity.
+**pyproj Library**: Uses the PROJ library for accurate EPSG transformations.
 
 ### Performance
 

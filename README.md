@@ -5,11 +5,11 @@ A comprehensive PyQt6 GUI application for transforming seismic grid data between
 ## 🚀 Features
 
 ### Core Functionality
-- **Coordinate System Transformation**: Transform seismic grid data between any EPSG-defined coordinate systems
+- **Coordinate System Transformation**: Transform grid data between any EPSG-defined coordinate systems using pyproj
 - **Comprehensive CRS Support**: Access to 2,500+ EPSG coordinate reference systems with search functionality
 - **Batch Processing**: Convert multiple grid files simultaneously with progress tracking
 - **Real-time Preview**: Live preview of transformed coordinates
-- **File Format Support**: Handles both comma-separated (.dat) and fixed-width format files
+- **File Format Support**: Handles comma and space delimited files
 
 ### User Interface
 - **Intuitive 3-Panel Layout**:
@@ -69,7 +69,7 @@ pip install PyQt6 matplotlib numpy pyproj
 
 1. **Launch the Application**:
    ```bash
-   python seismic_grid_app.py
+   python gridlab.py
    ```
 
 2. **Select Coordinate Systems**:
@@ -89,13 +89,13 @@ pip install PyQt6 matplotlib numpy pyproj
 
 ### Supported File Formats
 
-#### Comma-Separated Format (.dat files)
+#### Comma-Separated Format
 ```
 2069796.95394,641202.17144,1.5778
 2069906.95442,641202.74858,1.5775
 ```
 
-#### Fixed-Width Format (Fault files)
+#### Fixed-Width Format
 ```
   2070376.44   658741.74      1e+030         1
   2070367.95   658740.90      1e+030         1
@@ -122,7 +122,7 @@ The application supports transformation between any EPSG-defined coordinate syst
 
 ### Core Components
 
-- **`seismic_grid_app.py`**: Main PyQt6 application with GUI
+- **`gridlab.py`**: Main PyQt6 application with GUI
 - **`transform_coordinates.py`**: Command-line transformation utilities
 - **`CRSSelectionDialog`**: Searchable CRS selection interface
 - **`TransformationWorker`**: Background processing thread
@@ -130,7 +130,7 @@ The application supports transformation between any EPSG-defined coordinate syst
 
 ### Key Classes
 
-- **`SeismicGridApp`**: Main application window
+- **`GridLab`**: Main application window
 - **`CRSSelectionDialog`**: EPSG code selection dialog
 - **`TransformationWorker`**: Multi-threaded transformation processor
 - **`OutputTextViewer`**: Text preview widget

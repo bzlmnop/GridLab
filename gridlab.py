@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                               QGroupBox, QCheckBox, QComboBox, QHBoxLayout, QTabWidget, QTableWidget,
                               QTableWidgetItem, QHeaderView)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt6.QtGui import QAction, QFont
+from PyQt6.QtGui import QAction, QFont, QIcon
 from gridfile import GridFile
 
 
@@ -354,6 +354,18 @@ class GridLabApp(QMainWindow):
 
         self.setWindowTitle("GridLab")
         self.setGeometry(100, 100, 1400, 900)
+
+        # Set window icon (this controls the title bar icon)
+        icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
+        if os.path.exists(icon_path):
+            window_icon = QIcon(icon_path)
+            self.setWindowIcon(window_icon)
+        else:
+            # Fallback: try PNG format
+            icon_path_png = os.path.join(os.path.dirname(__file__), "icon.png")
+            if os.path.exists(icon_path_png):
+                window_icon = QIcon(icon_path_png)
+                self.setWindowIcon(window_icon)
 
         # Create central widget and layout
         central_widget = QWidget()
@@ -1226,7 +1238,7 @@ def main():
     app = QApplication(sys.argv)
 
     # Set application properties
-    app.setApplicationName("Grid Transformation Tool")
+    app.setApplicationName("GridLab")
     app.setApplicationVersion("1.0.0")
 
     # Create and show main window

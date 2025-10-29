@@ -1,5 +1,7 @@
 # GridLab - Seismic Grid Transformation Tool
 
+<img src="icon.png" alt="GridLab Icon" width="64" height="64">
+
 A comprehensive PyQt6 GUI application for transforming seismic grid data between different coordinate reference systems (CRS). Built specifically for geophysicists and seismic data analysts who need to convert coordinate systems for seismic grid files.
 
 ## 🚀 Features

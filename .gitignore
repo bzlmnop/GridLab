@@ -1,5 +1,9 @@
 # Seismic Grid Data Files
 20251016/
+20251021/
+20251028/
+20251106/
+20260119/
 **/NAD27/
 **/NAD83/
 
@@ -8,6 +12,8 @@ seismic_app_env/
 venv/
 env/
 ENV/
+gridlab_env/
+test_env/
 .venv/
 
 # Python Cache
@@ -39,10 +45,13 @@ logs/
 *.bak
 
 # Distribution
-dist/
 build/
 *.egg-info/
+*.spec
 
 # Test Files
 test_*.py
 *_test.py
+
+# old files
+icon_old.ico
